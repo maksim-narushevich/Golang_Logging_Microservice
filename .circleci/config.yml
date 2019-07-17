@@ -1,0 +1,79 @@
+version: 2.1
+
+
+executors:
+  golang:
+    docker:
+      - image: circleci/golang:1.9.7-stretch
+        environment:
+          DOCKER_IMAGE_NAME: maksim1990/go-logging-micro-service
+
+jobs:
+  build:
+    executor: golang
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="18.06.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            sudo tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            sudo mv /tmp/docker/* /usr/bin
+      - run:
+          name: Build custom Docker image
+          command: |
+            TAG=latest
+            docker build -t   $DOCKER_IMAGE_NAME:$TAG -f ./docker/Dockerfile_deploy .
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push $DOCKER_IMAGE_NAME:$TAG
+
+  deploy:
+    machine:
+      enabled: true
+    working_directory: ~/go-logging-micro-service
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "0c:33:a8:8c:40:06:fa:ae:13:c8:63:a6:e7:52:a1:b0"
+      - checkout
+      - run:
+          name: Copy docker folder & compose file to the server
+          command: |
+              cp ./deploy/docker-compose.dev.tpl.yml ./docker-compose.yml
+              scp -r ./docker-compose.yml $SSH_USER_VPS@$SSH_HOST_VPS:$PROJECT_DIR
+      - run:
+          name: Login into Docker Hub account
+          command: ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker login -u $DOCKER_USER -p $DOCKER_PASS"
+      - run:
+          name: Recreate docker containers
+          command: |
+              ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker-compose pull"
+              ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker-compose down"
+              ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker-compose up -d --no-deps --force-recreate"
+      - run:
+          name: Set up app environment
+          command: |
+              ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker exec go-logging-micro-service cp ./.env.dist ./.env"
+      - run:
+          name: Clean not used docker files
+          command: ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker image prune -a -f"
+
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - develop
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master

@@ -1,0 +1,15 @@
+version: "3.5"
+services:
+
+    go-service:
+        image: maksim1990/go-logging-micro-service:latest
+        tty: true
+        networks:
+          - docker-shared-services
+        container_name: go-logging-micro-service
+        volumes:
+            - "./logs/:/go/src/github.com/go-logging-micro-service/logs"
+
+networks:
+  docker-shared-services:
+    external: true
