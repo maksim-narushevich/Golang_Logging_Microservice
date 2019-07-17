@@ -17,4 +17,4 @@ RUN go build main.go
 RUN find . ! -name 'main' -type f -exec rm -f {} +
 
 # Start application command
-CMD ["./main", "&>", "/dev/null", "&"]
+CMD ["./main"]
