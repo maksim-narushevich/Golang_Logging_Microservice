@@ -1,0 +1,20 @@
+FROM golang:latest
+
+RUN apt-get update && apt-get install vim -y
+
+RUN go get "github.com/joho/godotenv"
+RUN go get "github.com/streadway/amqp"
+
+COPY ./src /go/src/github.com/go-logging-micro-service
+
+# Set working directory
+WORKDIR /go/src/github.com/go-logging-micro-service
+
+# Build GO binary file
+RUN go build main.go
+
+# Remove all unnecessary source code except compile binary file and API docs
+RUN find . ! -name 'main' -type f -exec rm -f {} +
+
+# Start application command
+CMD ["./main", "&>", "/dev/null", "&"]
