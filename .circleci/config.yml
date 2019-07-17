@@ -58,7 +58,7 @@ jobs:
           name: Set up app environment and start app
           command: |
               ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker exec go-logging-micro-service cp ./.env.dist ./.env"
-              ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker exec go-logging-micro-service ./main"
+              ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker exec go-logging-micro-service ./main &> /dev/null &"
       - run:
           name: Clean not used docker files
           command: ssh $SSH_USER_VPS@$SSH_HOST_VPS "cd $PROJECT_DIR && docker image prune -a -f"
