@@ -1,6 +1,7 @@
 /.idea
 gin-bin.exe
 /src/.env
+/src/main
 gin-bin
 gin-bin.exe
 /build
