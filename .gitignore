@@ -1,0 +1,7 @@
+/.idea
+gin-bin.exe
+/src/.env
+gin-bin
+gin-bin.exe
+/build
+/logs
