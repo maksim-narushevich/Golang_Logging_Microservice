@@ -14,7 +14,8 @@ WORKDIR /go/src/github.com/go-logging-micro-service
 RUN go build main.go
 
 # Remove all unnecessary source code except compile binary file and API docs
-RUN find . ! -name 'main' -type f -exec rm -f {} +
+RUN find . ! -name 'main' ! -name '.env.dist' -type f -exec rm -f {} +
+RUN rm -rf ./*
 
 # Start application command
 #CMD ["./main"]

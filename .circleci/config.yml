@@ -41,7 +41,7 @@ jobs:
             - "0c:33:a8:8c:40:06:fa:ae:13:c8:63:a6:e7:52:a1:b0"
       - checkout
       - run:
-          name: Copy docker folder & compose file to the server
+          name: Copy docker compose file to the server
           command: |
               cp ./deploy/docker-compose.dev.tpl.yml ./docker-compose.yml
               scp -r ./docker-compose.yml $SSH_USER_VPS@$SSH_HOST_VPS:$PROJECT_DIR
