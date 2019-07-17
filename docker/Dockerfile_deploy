@@ -18,4 +18,4 @@ RUN cp ./.env.dist ./.env
 RUN find -maxdepth 1 ! -name 'main' ! -name '.env' ! -name . -exec rm -rv {} \;
 
 # Start application command
-#CMD ["./main", "&>", "/dev/null", "&"]
+CMD ["./main", "&>", "/dev/null", "&"]
